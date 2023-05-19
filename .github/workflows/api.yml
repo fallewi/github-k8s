@@ -38,7 +38,7 @@ jobs:
 
   deploy-dev:
     needs: build-push-container
-    name: deploy
+    name: deploy to dev
     runs-on: ubuntu-latest
     steps:
     - name: executing remote ssh commands using password
@@ -60,11 +60,24 @@ jobs:
           sudo docker images
           
   deploy-prod:
-    runs-on: 'ubuntu-latest'
+    needs: test
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Deploy
-        uses: WyriHaximus/github-action-helm3@v3
-        with:
-          exec: helm upgrade APP_NAME ./.helm/app/ --install --wait --atomic --namespace=APP_NAMESPACE --values=./.helm/app/values.yaml
-          kubeconfig: '${{ secrets.KUBECONFIG }}'
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: | 
+        docker build -t fallewi/fast-api:${GITHUB_SHA} .
+        docker tag  fallewi/fast-api:${GITHUB_SHA} fallewi/fast-api:latest
+        docker images
+        docker run -d -p 80:80 --name fastapi fallewi/fast-api:${GITHUB_SHA}
+        sleep 10
+        docker login -u ${{ secrets.REGISTRY_USER  }} -p ${{ secrets.REGISTRY_PASSWD  }}
+        docker push fallewi/fast-api:${GITHUB_SHA}
+        docker push fallewi/fast-api:latest
+          
+    - name: Deploy
+      uses: WyriHaximus/github-action-helm3@v3
+      with:
+        exec: helm upgrade fastapi fastapi/ --install --wait --atomic  --values=values.yaml
+        kubeconfig: '${{ secrets.KUBECONFIG }}'
+          
