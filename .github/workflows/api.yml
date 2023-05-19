@@ -69,6 +69,7 @@ jobs:
         cp fastapi/values.yaml values.yml
         cat values.yml
         sed -i "s+tag.*+tag: ${GITHUB_SHA}+g" values.yml
+        ls
           
     - name: Deploy dev
       uses: WyriHaximus/github-action-helm3@v3
