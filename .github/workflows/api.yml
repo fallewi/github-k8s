@@ -70,9 +70,21 @@ jobs:
         cat values.yml
         sed -i "s+tag.*+tag: ${GITHUB_SHA}+g" values.yml
           
-    - name: Deploy
+    - name: Deploy dev
       uses: WyriHaximus/github-action-helm3@v3
       with:
-        exec: helm upgrade fastapi ./.helm/fastapi/ --install --wait --atomic  --values=values.yaml
+        exec: helm upgrade fastapi ./.helm/fastapi/ --install --create-namespace --namespace dev --wait --atomic  --values=values.yaml
+        kubeconfig: '${{ secrets.KUBECONFIG }}'
+        
+    - name: Deploy test
+      uses: WyriHaximus/github-action-helm3@v3
+      with:
+        exec: helm upgrade fastapi ./.helm/fastapi/ --install --create-namespace --namespace test --wait --atomic  --values=values.yaml
+        kubeconfig: '${{ secrets.KUBECONFIG }}'
+        
+    - name: Deploy prod
+      uses: WyriHaximus/github-action-helm3@v3
+      with:
+        exec: helm upgrade fastapi ./.helm/fastapi/ --install --create-namespace --namespace prod--wait --atomic  --values=values.yaml
         kubeconfig: '${{ secrets.KUBECONFIG }}'
           
