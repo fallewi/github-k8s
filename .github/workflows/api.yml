@@ -60,7 +60,7 @@ jobs:
           sudo docker images
           
   deploy-prod:
-    needs: test
+    needs: deploy-dev
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
