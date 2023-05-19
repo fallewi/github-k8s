@@ -36,7 +36,7 @@ jobs:
         docker push fallewi/fast-api:${GITHUB_SHA}
         docker push fallewi/fast-api:latest
 
-  deploy:
+  deploy-dev:
     needs: build-push-container
     name: deploy
     runs-on: ubuntu-latest
@@ -58,3 +58,13 @@ jobs:
           curl localhost:9000
           ls 
           sudo docker images
+          
+  deploy-prod:
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy
+        uses: WyriHaximus/github-action-helm3@v3
+        with:
+          exec: helm upgrade APP_NAME ./.helm/app/ --install --wait --atomic --namespace=APP_NAMESPACE --values=./.helm/app/values.yaml
+          kubeconfig: '${{ secrets.KUBECONFIG }}'
