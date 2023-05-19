@@ -73,6 +73,6 @@ jobs:
     - name: Deploy
       uses: WyriHaximus/github-action-helm3@v3
       with:
-        exec: helm upgrade fastapi fastapi/ --install --wait --atomic  --values=values.yaml
+        exec: helm upgrade fastapi ./.helm/fastapi/ --install --wait --atomic  --values=values.yaml
         kubeconfig: '${{ secrets.KUBECONFIG }}'
           
